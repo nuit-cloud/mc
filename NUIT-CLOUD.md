@@ -6,14 +6,15 @@ and github.com/minio/mc is archived, so the platform builds its own image from t
 
 ## What is here
 
-The branch `nuit-cloud` (the default branch) is upstream's last release, `RELEASE.2025-08-13T08-35-41Z` (commit `7394ce0dd2a8`), unchanged, plus:
+`main` (the default branch) is upstream's last release, `RELEASE.2025-08-13T08-35-41Z` (commit `7394ce0dd2a8`), unchanged, plus:
 
 - `Dockerfile.nuit-cloud`: compiles this repository's own source, cross-compiled on the builder's platform (no emulation), stamped the
   way upstream's release build stamps it.
 - `.github/workflows/nuit-cloud-image.yml`: the only workflow. Upstream's workflows were removed, so nothing else spends runner time.
 - this file.
 
-`master` is upstream's branch as it was forked; nothing builds from it.
+Work is trunk-based: `main` is the only branch, and every change is a commit on it, with no feature branches. Nothing builds from any
+other branch.
 
 ## Releasing
 
@@ -24,7 +25,7 @@ summary. The platform (github.com/mgjoyce/nuit-cloud) pins that digest; moving t
 
 ## Security patches
 
-Upstream will not fix anything again: security patches land here, on `nuit-cloud`, as ordinary commits (a Go dependency bump, a backported
+Upstream will not fix anything again: security patches land here, on `main`, as ordinary commits (a Go dependency bump, a backported
 fix). Release a patched build under a new tag, `nuit-cloud/<upstream release>-nc<n>` (the build stamps `--version` from the part up to
 `Z`, and the image's revision label names the commit built). The longer-term plan is to move off MinIO altogether (an issue in
 mgjoyce/nuit-cloud).
