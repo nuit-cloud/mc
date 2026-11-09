@@ -26,7 +26,7 @@ RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache
 FROM scratch
 ARG RELEASE=RELEASE.2025-08-13T08-35-41Z
 ARG REVISION=unknown
-LABEL org.opencontainers.image.title="nuit-cloud-mc" \
+LABEL org.opencontainers.image.title="mc" \
       org.opencontainers.image.description="MinIO's client (mc), built from the Nuit Cloud fork of github.com/minio/mc" \
       org.opencontainers.image.source="https://github.com/nuit-cloud/mc" \
       org.opencontainers.image.version="$RELEASE" \

@@ -2,7 +2,7 @@
 
 The Nuit Cloud platform runs MinIO's client, `mc`. MinIO no longer publishes images anyone can pull (Docker Hub went first; quay.io answers 401 since 2026)
 and github.com/minio/mc is archived, so the platform builds its own image from this fork and pins it by digest:
-`ghcr.io/nuit-cloud/nuit-cloud-mc`.
+`ghcr.io/nuit-cloud/mc`.
 
 ## What is here
 
@@ -19,7 +19,7 @@ The branch `nuit-cloud` (the default branch) is upstream's last release, `RELEAS
 
 Build locally first (`docker buildx build -f Dockerfile.nuit-cloud --platform linux/amd64,linux/arm64 -o type=local,dest=out .`), then push a
 tag `nuit-cloud/<release>`, for example `nuit-cloud/RELEASE.2025-08-13T08-35-41Z`. The workflow builds amd64 and arm64, pushes
-`ghcr.io/nuit-cloud/nuit-cloud-mc:<release>` with an SBOM and provenance, signs it by digest with cosign and writes the digest to the run's
+`ghcr.io/nuit-cloud/mc:<release>` with an SBOM and provenance, signs it by digest with cosign and writes the digest to the run's
 summary. The platform (github.com/mgjoyce/nuit-cloud) pins that digest; moving to a new image is changing the digest there (deploy/CLAUDE.md).
 
 ## Security patches
