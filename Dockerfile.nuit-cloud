@@ -1,0 +1,36 @@
+# mc, MinIO's client, as the Nuit Cloud platform carries it (see NUIT-CLOUD.md). Compiled from this repository's own source, unchanged from
+# upstream at the release this branch starts from, and stamped the way upstream's release build stamps it (buildscripts/gen-ldflags.go).
+#
+#   docker buildx build -f Dockerfile.nuit-cloud --platform linux/amd64,linux/arm64 .
+#
+# Go cross-compiles on the builder's own platform for the target's (CGO off, so the binary is static): nothing runs under emulation, and the
+# image holds only the binary.
+ARG GO_IMAGE=golang:1.24-alpine
+
+FROM --platform=$BUILDPLATFORM ${GO_IMAGE} AS build
+ARG TARGETOS=linux
+ARG TARGETARCH
+# The release this source is (upstream's tag) and its commit: what `mc --version` reports. The image's revision label names the commit built.
+ARG RELEASE=RELEASE.2025-08-13T08-35-41Z
+ARG COMMIT=7394ce0dd2a80935aded936b09fa12cbb3cb8096
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=/go/pkg/mod go mod download
+COPY . .
+RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache/go-build \
+    set -eu; t="${RELEASE#RELEASE.}"; t="${t%%Z*}"; d="${t%%T*}"; h="$(echo "${t#*T}" | tr - :)"; \
+    year="$(echo "$d" | cut -c1-4)"; p=github.com/minio/mc/cmd; \
+    CGO_ENABLED=0 GOOS="$TARGETOS" GOARCH="${TARGETARCH:-$(go env GOARCH)}" go build -trimpath -o /out/mc \
+      -ldflags "-s -w -X $p.Version=${d}T${h}Z -X $p.CopyrightYear=$year -X $p.ReleaseTag=$RELEASE -X $p.CommitID=$COMMIT -X $p.ShortCommitID=$(echo "$COMMIT" | cut -c1-12)" .
+
+FROM scratch
+ARG RELEASE=RELEASE.2025-08-13T08-35-41Z
+ARG REVISION=unknown
+LABEL org.opencontainers.image.title="nuit-cloud-mc" \
+      org.opencontainers.image.description="MinIO's client (mc), built from the Nuit Cloud fork of github.com/minio/mc" \
+      org.opencontainers.image.source="https://github.com/nuit-cloud/mc" \
+      org.opencontainers.image.version="$RELEASE" \
+      org.opencontainers.image.revision="$REVISION" \
+      org.opencontainers.image.licenses="AGPL-3.0-only"
+COPY --from=build /out/mc /mc
+ENTRYPOINT ["/mc"]
